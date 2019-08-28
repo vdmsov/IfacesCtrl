@@ -18,6 +18,7 @@ class IfacesCtrl:
 
 	
 	def get_interfaces (self):
+
 		self.func_name()
 
 		process = sp.Popen(['ip', 'addr', 'show'], stdout=sp.PIPE)
@@ -49,8 +50,21 @@ class IfacesCtrl:
 		self.func_name()
 
 	
-	def check_ping (self):
+	def check_ping (self, dev, amount, wait):
+
 		self.func_name()
+
+		process = sp.Popen(["""ping -I """ + str(dev) + \
+			""" -c""" + str(amount) + \
+			""" -q -nW""" + str(wait) + \
+			""" 8.8.8.8 | grep loss | awk '{print $(NF-4)}' | cut -d"%" -f1"""], \
+			stdout=sp.PIPE, shell = True)
+
+		packet_loss = process.communicate()[0]
+
+		print('packet loss = ')
+		print(packet_loss)
+		return packet_loss
 
 	
 	def reboot_network (self):	
@@ -79,7 +93,7 @@ class IfacesCtrl:
 #======================== FOR TEST =================================
 	
 	def func_name (self):
-		print('>>> '  +  str(inspect.stack()[1][3]) + '()\n')
+		print('\n>>> '  +  str(inspect.stack()[1][3]) + '()\n')
 
 
 # get ip address
