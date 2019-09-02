@@ -31,3 +31,8 @@ ifaces.down_link(ifaces.iface[1])
 
 ifaces.up_link(ifaces.iface[1])
 
+
+ifaces.add_default(ifaces.iface[1], '192.168.1.1')
+
+ifaces.restart_network()
+

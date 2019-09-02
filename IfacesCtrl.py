@@ -17,13 +17,11 @@ class IfacesCtrl:
 #-------------------------------------------------------------------------------
 
 	def __init__ (self):
-
 		print("=== IfacesCtrl object is created ===\n")
 
 #-------------------------------------------------------------------------------
 
 	def get_interfaces (self):
-
 		self.func_name()
 
 		process = sp.Popen(['ip addr show'], stdout=sp.PIPE, shell = True)
@@ -43,8 +41,8 @@ class IfacesCtrl:
 	def get_default (self, iface_name):
 		self.func_name()
 		
-		process = sp.Popen(['ip route show | grep default | grep ' + str(iface_name)], \
-			stdout=sp.PIPE, shell = True)
+		process = sp.Popen(['ip route show | grep default | grep ' + \
+			str(iface_name)], stdout=sp.PIPE, shell = True)
 
 		stdout = process.communicate()[0]
 
@@ -58,18 +56,57 @@ class IfacesCtrl:
 
 #-------------------------------------------------------------------------------
 
-	def set_default (self):
+	def add_default (self, iface_name, gateway):
 		self.func_name()
+
+		process = sp.Popen(["ip route add default via " + str(gateway) + \
+			" dev " + str(iface_name)], stdout=sp.PIPE, shell = True)
+
+		stdout = process.communicate()[0]
+
+		print(stdout)
+
+#-------------------------------------------------------------------------------
+
+	def replace_default (self, iface_name, gateway):
+		self.func_name()
+
+		process = sp.Popen(["ip route replace default via " + str(gateway) + \
+			" dev " + str(iface_name)], stdout=sp.PIPE, shell = True)
+
+		stdout = process.communicate()[0]
+
+		print(stdout)
 	
+#-------------------------------------------------------------------------------
+
+	def change_default (self, iface_name, gateway):
+		self.func_name()
+
+		process = sp.Popen(["ip route change default via " + str(gateway) + \
+			" dev " + str(iface_name)], stdout=sp.PIPE, shell = True)
+
+		stdout = process.communicate()[0]
+
+		print(stdout)
+
 #-------------------------------------------------------------------------------
 
 	def get_gateway (self):
 		self.func_name()
 
+		gws = ni.gateways()
+
+		gw_default = gws['default'][ni.AF_INET]
+
+		if len(gw_default) > 3:
+			return str(gw_default)
+		else:
+			return ''
+
 #-------------------------------------------------------------------------------
 	
 	def check_ping (self, iface_name, amount, wait):
-
 		self.func_name()
 
 		process = sp.Popen(["""ping -I """ + str(iface_name) + \
@@ -87,16 +124,27 @@ class IfacesCtrl:
 
 #-------------------------------------------------------------------------------
 	
-	def reboot_network (self):	
+	def restart_network (self):	
 		self.func_name()
+
+		process = sp.Popen(['/etc/init.d/networking restart'], \
+			stdout=sp.PIPE, shell = True)
+
+		stdout = process.communicate()[0]
+
+		print(stdout)
 
 #-------------------------------------------------------------------------------
 	
 	def up_link (self, iface_name):
 		self.func_name()
 
-		sp.Popen(['ip link set ' + str(iface_name) + ' up'], \
-			stdout=sp.PIPE, shell = True)
+		if iface_name[0:2] == 'ppp':
+			sp.Popen(["pon sim"], stdout=sp.PIPE, shell = True)
+			# need add interface name from linux configuation file
+		else:
+			sp.Popen(['ip link set ' + str(iface_name) + ' up'], \
+				stdout=sp.PIPE, shell = True)
 
 		print('Interface is Up', iface_name)
 
@@ -105,8 +153,12 @@ class IfacesCtrl:
 	def down_link (self, iface_name):
 		self.func_name()
 
-		sp.Popen(['ip link set ' + str(iface_name) + ' down'], \
-			stdout=sp.PIPE, shell = True)
+		if iface_name[0:2] == 'ppp':
+			sp.Popen(["poff sim"], stdout=sp.PIPE, shell = True)
+			# need add interface name from linux configuation file
+		else:
+			sp.Popen(['ip link set ' + str(iface_name) + ' down'], \
+				stdout=sp.PIPE, shell = True)
 
 		print('Interface is Down', iface_name)
 
@@ -141,6 +193,3 @@ class IfacesCtrl:
 # netifaces.gateways()['default'][netifaces.AF_INET]
 # netifaces.gateways()['default'][netifaces.AF_INET][0] - gateway
 # netifaces.gateways()['default'][netifaces.AF_INET][1] - interface name
-
-
-
