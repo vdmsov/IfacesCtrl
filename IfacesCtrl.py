@@ -97,7 +97,7 @@ class IfacesCtrl:
 
 		gws = ni.gateways()
 
-		gw_default = gws['default'][ni.AF_INET]
+		gw_default = gws['default'][ni.AF_INET][0]
 
 		if len(gw_default) > 3:
 			return str(gw_default)
@@ -120,11 +120,11 @@ class IfacesCtrl:
 		if packet_loss >= 0:
 			return packet_loss
 		else:
-			return 100		
+			return 100
 
 #-------------------------------------------------------------------------------
 	
-	def restart_network (self):	
+	def restart_network (self):
 		self.func_name()
 
 		process = sp.Popen(['/etc/init.d/networking restart'], \

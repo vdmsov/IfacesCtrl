@@ -36,3 +36,7 @@ ifaces.add_default(ifaces.iface[1], '192.168.1.1')
 
 ifaces.restart_network()
 
+gw_default = ifaces.get_gateway()
+
+print(gw_default)
+
