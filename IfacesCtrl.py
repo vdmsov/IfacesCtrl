@@ -11,13 +11,35 @@ import inspect
 
 class IfacesCtrl:
 
-
 	iface = []
 
 #-------------------------------------------------------------------------------
 
 	def __init__ (self):
 		print("=== IfacesCtrl object is created ===\n")
+
+		self.get_interfaces()
+
+#-------------------------------------------------------------------------------
+
+	def set_gateway (self, iface_name):
+		self.func_name()
+
+		gw = None
+
+		if iface_name == 'enp9s0': 
+			gw = '192.168.1.1'
+		if iface_name == 'wlp8s0': 
+			gw = '192.168.1.2'
+		if iface_name == 'wlan0': 
+			gw = '192.168.1.3'
+
+		for n, i in enumerate(self.iface):
+
+			if i.get('name') == iface_name:
+				self.iface[n]['gateway'] = gw
+
+		print(self.iface)
 
 #-------------------------------------------------------------------------------
 
@@ -31,28 +53,35 @@ class IfacesCtrl:
 		temp = [i for i in temp if i]
 
 		for n, l in enumerate(temp):
-			if l[0] == '<':
-				self.iface.append(temp[n-1])
 
-		self.iface.remove('lo')
+			if l[0] == '<':
+				name = temp[n-1]
+
+				if (name != 'lo'):
+					self.iface.append({'name':name})
+
+		print(self.iface)
 		
 #-------------------------------------------------------------------------------
 
-	def get_default (self, iface_name):
-		self.func_name()
-		
-		process = sp.Popen(['ip route show | grep default | grep ' + \
-			str(iface_name)], stdout=sp.PIPE, shell = True)
+	def get_default (self):
+		self.func_name()		
 
-		stdout = process.communicate()[0]
+		for n, i in enumerate(self.iface):
 
-		temp = re.split('[ ]+',stdout)
+			process = sp.Popen(['ip route show | grep default | grep ' + \
+			str(i.get('name'))], stdout=sp.PIPE, shell = True)
 
+			stdout = process.communicate()[0]
 
-		if temp[0] == 'default':
-			return True
-		else:
-			return False
+			temp = re.split('[ ]+',stdout)
+
+			if temp[0] == 'default':
+				self.iface[n]['default'] = True
+			else:
+				self.iface[n]['default'] = False
+				
+		print(self.iface)
 
 #-------------------------------------------------------------------------------
 
